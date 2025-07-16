@@ -1,0 +1,25 @@
+{
+  "name": "hexo-posts-embedding",
+  "version": "0.0.1",
+  "description": "Posts embedding for Hexo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "next-theme/hexo-posts-embedding",
+  "keywords": [
+    "Hexo",
+    "NexT"
+  ],
+  "author": "Mimi <stevenjoezhang@gmail.com> (https://zhangshuqiao.org)",
+  "readme": "https://github.com/next-theme/hexo-posts-embedding#readme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/next-theme/hexo-posts-embedding/issues"
+  },
+  "homepage": "https://github.com/next-theme/hexo-posts-embedding#readme",
+  "dependencies": {
+    "@huggingface/transformers": "^3.6.3",
+    "hnswlib-node": "^3.0.0"
+  }
+}
