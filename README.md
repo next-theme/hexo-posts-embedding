@@ -20,11 +20,11 @@ hexo clean
 
 Released under the MIT License
 
-[npm-image]: https://img.shields.io/npm/v/hexo-posts-embedding?style=flat-square
-[lic-image]: https://img.shields.io/npm/l/hexo-posts-embedding?style=flat-square
+[npm-image]: https://img.shields.io/npm/v/hexo-posts-embedding?style=for-the-badge
+[lic-image]: https://img.shields.io/npm/l/hexo-posts-embedding?style=for-the-badge
 
-[size-image]: https://img.shields.io/github/languages/code-size/next-theme/hexo-posts-embedding?style=flat-square
-[dm-image]: https://img.shields.io/npm/dm/hexo-posts-embedding?style=flat-square
-[dt-image]: https://img.shields.io/npm/dt/hexo-posts-embedding?style=flat-square
+[size-image]: https://img.shields.io/github/languages/code-size/next-theme/hexo-posts-embedding?style=for-the-badge
+[dm-image]: https://img.shields.io/npm/dm/hexo-posts-embedding?style=for-the-badge
+[dt-image]: https://img.shields.io/npm/dt/hexo-posts-embedding?style=for-the-badge
 
 [npm-url]: https://www.npmjs.com/package/hexo-posts-embedding
