@@ -35,6 +35,7 @@ class BiMap {
 
 const numDimensions = 384; // the length of data point vector that will be indexed.
 const maxElements = 1024; // the maximum number of data points.
+const modelName = 'Xenova/all-MiniLM-L6-v2';
 
 // declaring and intializing index.
 const index = new HierarchicalNSW('l2', numDimensions);
@@ -43,8 +44,72 @@ index.initIndex(maxElements);
 let extractor;
 const labelMapping = new BiMap();
 
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes)) return '';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let value = bytes;
+  let unit = units.shift();
+  while (value >= 1024 && units.length) {
+    value /= 1024;
+    unit = units.shift();
+  }
+  return `${value.toFixed(value >= 10 || unit === 'B' ? 0 : 1)} ${unit}`;
+}
+
+function createProgressLogger(log) {
+  const lastLogged = new Map();
+  let activeDownload;
+
+  return data => {
+    if (!data) return;
+
+    const key = data.file
+      ? `${data.name || modelName}/${data.file}`
+      : activeDownload;
+
+    if (data.status === 'initiate') {
+      log.info(`Loading embedding model file: ${key}`);
+      return;
+    }
+
+    if (data.status === 'download') {
+      activeDownload = key;
+      return;
+    }
+
+    if (data.status === 'done') {
+      if (activeDownload === key) activeDownload = null;
+      return;
+    }
+
+    if (!key) return;
+    if (typeof data.progress !== 'number') return;
+    if (data.status && data.status !== 'progress') return;
+
+    const progress = Math.floor(data.progress);
+    const previous = lastLogged.get(key) || 0;
+    if (progress < 100 && progress - previous < 5) return;
+
+    lastLogged.set(key, progress);
+
+    const width = 20;
+    const filled = Math.round((Math.min(progress, 100) / 100) * width);
+    const bar = `${'#'.repeat(filled)}${'-'.repeat(width - filled)}`;
+    const size = data.total
+      ? ` (${formatBytes(data.loaded)} / ${formatBytes(data.total)})`
+      : '';
+
+    log.info(`Downloading ${key} [${bar}] ${progress}%${size}`);
+  };
+}
+
 hexo.extend.filter.register('after_init', async function() {
-  extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  const log = this.log || hexo.log;
+  log.info(`Loading embedding model: ${modelName}`);
+  extractor = await pipeline('feature-extraction', modelName, {
+    progress_callback: createProgressLogger(log)
+  });
+  log.info(`Embedding model ready: ${modelName}`);
 });
 
 hexo.extend.filter.register('before_post_render', async function(data) {
