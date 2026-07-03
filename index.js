@@ -1,4 +1,5 @@
-const { pipeline } = require('@huggingface/transformers');
+const path = require('node:path');
+const { env, pipeline } = require('@huggingface/transformers');
 const { HierarchicalNSW } = require('hnswlib-node');
 
 class BiMap {
@@ -36,6 +37,20 @@ class BiMap {
 const numDimensions = 384; // the length of data point vector that will be indexed.
 const maxElements = 1024; // the maximum number of data points.
 const modelName = 'Xenova/all-MiniLM-L6-v2';
+const config = hexo.config.posts_embedding = Object.assign({
+  cache_dir: path.join('.cache', 'hexo-posts-embedding')
+}, hexo.config.posts_embedding);
+
+function resolveCacheDir(cacheDir) {
+  if (!cacheDir || typeof cacheDir !== 'string') return null;
+  if (path.isAbsolute(cacheDir)) return cacheDir;
+  return path.join(hexo.base_dir, cacheDir);
+}
+
+const cacheDir = resolveCacheDir(config.cache_dir);
+if (cacheDir) {
+  env.cacheDir = cacheDir;
+}
 
 // declaring and intializing index.
 const index = new HierarchicalNSW('l2', numDimensions);
@@ -106,6 +121,9 @@ function createProgressLogger(log) {
 hexo.extend.filter.register('after_init', async function() {
   const log = this.log || hexo.log;
   log.info(`Loading embedding model: ${modelName}`);
+  if (cacheDir) {
+    log.info(`Embedding model cache: ${cacheDir}`);
+  }
   extractor = await pipeline('feature-extraction', modelName, {
     progress_callback: createProgressLogger(log)
   });

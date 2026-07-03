@@ -16,6 +16,17 @@ npm install hexo-posts-embedding
 hexo clean
 ```
 
+## Configuration
+
+By default, model files are cached in the Hexo site directory:
+
+```yaml
+posts_embedding:
+  cache_dir: .cache/hexo-posts-embedding
+```
+
+Set `cache_dir` to an absolute path to share the cache across projects, or set it to `false` to use the default Transformers.js cache directory.
+
 ## License
 
 Released under the MIT License
