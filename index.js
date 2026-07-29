@@ -1,4 +1,5 @@
 const path = require('node:path');
+const fs = require('node:fs');
 const { env, pipeline } = require('@huggingface/transformers');
 const { HierarchicalNSW } = require('hnswlib-node');
 
@@ -73,6 +74,7 @@ function formatBytes(bytes) {
 
 function createProgressLogger(log) {
   const lastLogged = new Map();
+  const cachedFiles = new Set();
   let activeDownload;
 
   return data => {
@@ -83,7 +85,12 @@ function createProgressLogger(log) {
       : activeDownload;
 
     if (data.status === 'initiate') {
-      log.info(`Loading embedding model file: ${key}`);
+      const cachePath = cacheDir && data.file
+        ? path.join(cacheDir, data.name || modelName, data.file)
+        : null;
+      const isCached = cachePath && fs.existsSync(cachePath);
+      if (isCached) cachedFiles.add(key);
+      log.info(`${isCached ? 'Loading cached' : 'Loading'} embedding model file: ${key}`);
       return;
     }
 
@@ -100,6 +107,7 @@ function createProgressLogger(log) {
     if (!key) return;
     if (typeof data.progress !== 'number') return;
     if (data.status && data.status !== 'progress') return;
+    if (cachedFiles.has(key)) return;
 
     const progress = Math.floor(data.progress);
     const previous = lastLogged.get(key) || 0;
@@ -113,8 +121,9 @@ function createProgressLogger(log) {
     const size = data.total
       ? ` (${formatBytes(data.loaded)} / ${formatBytes(data.total)})`
       : '';
+    const action = cachedFiles.has(key) ? 'Reading cached' : 'Downloading';
 
-    log.info(`Downloading ${key} [${bar}] ${progress}%${size}`);
+    log.info(`${action} ${key} [${bar}] ${progress}%${size}`);
   };
 }
 
